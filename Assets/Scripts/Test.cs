@@ -8,29 +8,51 @@ using System.Threading;
 
 public class Test : MonoBehaviour
 {
-    public string dbUrl = "abc";
+    public string dbName = "URI=file:test.db";
 
     // Start is called before the first frame update
     void Start()
     {
         CreateDB();
+        Display();
     }
 
     public void CreateDB()
     {
-        using(var connect = new SqliteConnection(dbUrl))
+        using(var connection = new SqliteConnection(dbName))
         {
-            connect.OpenAsync(CancellationToken.None);
+            connection.OpenAsync(CancellationToken.None);
 
-            
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "CREATE TABLE IF NOT EXISTS weapons (name VARCHAR(20), damage INT);" +
+                    "CREATE TABLE IF NOT EXISTS sowrds (name VARCHAR(20), dmg INT);";
+                command.ExecuteNonQuery();
+            }
+
+            connection.CloseAsync();
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Display()
     {
-        
+        using (var connection = new SqliteConnection(dbName))
+        {
+            connection.OpenAsync(CancellationToken.None);
+
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT * FROM weapons";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log("Name:" + reader["name"] + "Damage" + reader["damage"]);
+                    }
+                }
+            }
+
+            connection.CloseAsync();
+        }
     }
-
-
 }
