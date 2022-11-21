@@ -15,6 +15,7 @@ public class Database : MonoBehaviour
         Authors,
         Customers,
         Books,
+        Transactions,
         All
     }
 
@@ -35,6 +36,13 @@ public class Database : MonoBehaviour
     public string publisher;
     public int prices;
     public int year;
+    public int author_ID;
+
+    [Header("Transaction")]
+    public int ID;
+    public int customer_ID;
+    public int book_ISBN;
+
 
 
     // Start is called before the first frame update
@@ -51,9 +59,14 @@ public class Database : MonoBehaviour
 
             using (var command = connection.CreateCommand())
             {
-                command.CommandText = "CREATE TABLE IF NOT EXISTS Authors (ID INT PRIMARY KEY, Name VARCHAR(100));" +
-                    "CREATE TABLE IF NOT EXISTS Customers (ID INT PRIMARY KEY, Name VARCHAR(100));" +
-                    "CREATE TABLE IF NOT EXISTS Books (ISBN INT, Title VARCHAR(100), Genre VARCHAR(50), Publisher VARCHAR(100), Prices INT, Year INT)";
+                command.CommandText = "CREATE TABLE IF NOT EXISTS Authors (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR(100));" +
+
+                    "CREATE TABLE IF NOT EXISTS Customers (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR(100));" +
+
+                    "CREATE TABLE IF NOT EXISTS Transactions (ID INTEGER PRIMARY KEY AUTOINCREMENT, CustomerID INT, BookISBN INT, CreatedAt DATETIME," +
+                    "FOREIGN KEY (CustomerID) REFERENCES Customers(ID), FOREIGN KEY (BookISBN) REFERENCES Books(ISBN) );" +
+
+                    "CREATE TABLE IF NOT EXISTS Books (ISBN INTEGER PRIMARY KEY AUTOINCREMENT, Title VARCHAR(100), Genre VARCHAR(50), Publisher VARCHAR(100), Prices INT, Year INT, AuthorID INT, FOREIGN KEY (AuthorID) REFERENCES Authors(ID))";
                 command.ExecuteNonQuery();
             }
 
@@ -75,15 +88,19 @@ public class Database : MonoBehaviour
                         command.CommandText = "INSERT INTO Authors VALUES('"+ authorID + "','" +  authorName + "');";
                         break;
                     case TableName.Books:
-                        command.CommandText = "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "');";
+                        command.CommandText = "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "','" + author_ID + "'); ";
                         break;
                     case TableName.Customers:
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "');";
                         break;
+                    case TableName.Transactions:
+                        command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customer_ID + "','" + book_ISBN + "');";
+                        break;
                     case TableName.All:
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "');" +
-                            "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "');" +
-                            "INSERT INTO Authors VALUES('" + authorID + "','" + authorName + "');";
+                            "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "','" + author_ID + "'); " +
+                            "INSERT INTO Authors VALUES('" + authorID + "','" + authorName + "');" +
+                            "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + customerName + "');";
                         break;
                 }
                 command.ExecuteNonQuery();
@@ -129,7 +146,16 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"]);
+                        Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader[""]);
+                    }
+                }
+
+                command.CommandText = "SELECT * FROM Transactions";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
                     }
                 }
             }
