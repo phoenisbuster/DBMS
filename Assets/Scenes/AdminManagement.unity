@@ -975,16 +975,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tableName: 0
-  authorID: 1
+  authorID: 0
   authorName: jk rowling
   customerID: 0
-  customerName: 
+  customerName: Phuc
+  username: phucndb
+  password: 123456
   ISBN: 0
-  title: 
-  genre: 
+  title: Title 1
+  genre: Harry Potter
   publisher: 
-  prices: 0
-  year: 0
+  prices: 5
+  year: 2010
+  author_ID: 0
+  ID: 0
+  customer_ID: 0
+  book_ISBN: 0
 --- !u!1 &2059344572
 GameObject:
   m_ObjectHideFlags: 0

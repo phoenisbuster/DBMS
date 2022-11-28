@@ -28,6 +28,9 @@ public class Database : MonoBehaviour
     [Header("Customer")]
     public int customerID;
     public string customerName;
+    public string username;
+    public string password;
+
 
     [Header("Book")]
     public int ISBN;
@@ -61,7 +64,7 @@ public class Database : MonoBehaviour
             {
                 command.CommandText = "CREATE TABLE IF NOT EXISTS Authors (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR(100));" +
 
-                    "CREATE TABLE IF NOT EXISTS Customers (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR(100));" +
+                    "CREATE TABLE IF NOT EXISTS Customers (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name VARCHAR(100), username VARCHAR(100) NOT NULL UNIQUE, passowrd VARCHAR(100) NOT NULL);" +
 
                     "CREATE TABLE IF NOT EXISTS Transactions (ID INTEGER PRIMARY KEY AUTOINCREMENT, CustomerID INT, BookISBN INT, CreatedAt DATETIME," +
                     "FOREIGN KEY (CustomerID) REFERENCES Customers(ID), FOREIGN KEY (BookISBN) REFERENCES Books(ISBN) );" +
@@ -82,6 +85,7 @@ public class Database : MonoBehaviour
 
             using (var command = connection.CreateCommand())
             {
+                Debug.Log("Check table type " + tableName);
                 switch (tableName)
                 {
                     case TableName.Authors:
@@ -91,7 +95,7 @@ public class Database : MonoBehaviour
                         command.CommandText = "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "','" + author_ID + "'); ";
                         break;
                     case TableName.Customers:
-                        command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "');";
+                        command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "','" + username + "','" + password + "');";
                         break;
                     case TableName.Transactions:
                         command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customer_ID + "','" + book_ISBN + "');";
@@ -104,6 +108,7 @@ public class Database : MonoBehaviour
                         break;
                 }
                 command.ExecuteNonQuery();
+
                 Debug.LogError("Success");
             }
 
@@ -113,11 +118,11 @@ public class Database : MonoBehaviour
         Display();
     }
 
-    public void Display()
+    public static void Display()
     {
         Debug.Log("Print");
 
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection("URI=file:Database.db"))
         {
             connection.OpenAsync(CancellationToken.None);
 
@@ -137,7 +142,7 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log("ID: " + reader["ID"] + " Name " + reader["Name"]);
+                        Debug.Log("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
                     }
                 }
 
@@ -146,7 +151,7 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader[""]);
+                        Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
                     }
                 }
 
@@ -159,8 +164,32 @@ public class Database : MonoBehaviour
                     }
                 }
             }
-
             connection.CloseAsync();
         }
+    }
+
+    public void DeleteRow(TableName table, int id)
+    {
+        using (var connection = new SqliteConnection(dbName))
+        {
+            connection.OpenAsync(CancellationToken.None);
+
+            using (var command = connection.CreateCommand())
+            {
+                Debug.Log("Delete from table name " + table + " at id = " + id);
+                switch(table)
+                {
+                    case TableName.Authors:
+                        command.CommandText = "DELETE FROM Authors WHERE ID = " + id + ";";
+                        break;
+                    case TableName.Customers:
+                        command.CommandText = "DELETE FROM Customers WHERE ID = " + id + ";";
+                        break;
+                }
+                command.ExecuteNonQuery();
+            }
+            connection.CloseAsync();
+        }
+        Display();
     }
 }
