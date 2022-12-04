@@ -36,12 +36,12 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\Login+Signup\AccountManager.cs" />
      <Compile Include="Assets\Scripts\Login+Signup\Login.cs" />
      <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
      <Compile Include="Assets\Scripts\Test.cs" />
-     <Compile Include="Assets\Scripts\Database.cs" />
-     <Compile Include="Assets\Scripts\Login+Signup\AccountManager.cs" />
      <Compile Include="Assets\Scripts\Login+Signup\Signup.cs" />
+     <Compile Include="Assets\Scripts\Database.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
