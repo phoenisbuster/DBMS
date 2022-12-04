@@ -42,6 +42,8 @@
      <Compile Include="Assets\Scripts\Test.cs" />
      <Compile Include="Assets\Scripts\Login+Signup\Signup.cs" />
      <Compile Include="Assets\Scripts\Database.cs" />
+     <Compile Include="Assets\Scripts\MainScene\UserInfo\UserInfo.cs" />
+     <Compile Include="Assets\Scripts\MainScene\MainScene.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
@@ -321,6 +323,15 @@
     </Reference>
     <Reference Include="Mono.Data">
         <HintPath>D:\Unity Project\DBMS\Assets\Plugins\Mono.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="DemiLib">
+        <HintPath>D:\Unity Project\DBMS\Assets\Plugins\Demigiant\DemiLib\Core\DemiLib.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTween">
+        <HintPath>D:\Unity Project\DBMS\Assets\Plugins\Demigiant\DOTween\DOTween.dll</HintPath>
+    </Reference>
+    <Reference Include="DOTweenPro">
+        <HintPath>D:\Unity Project\DBMS\Assets\Plugins\Demigiant\DOTweenPro\DOTweenPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
         <HintPath>C:\Program Files\Unity\Hub\Editor\2021.3.0f1\Editor\Data\PlaybackEngines\iOSSupport\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
@@ -810,6 +821,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{86075362-ff91-6aae-8cda-cf817e39f4f0}</Project>
+      <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

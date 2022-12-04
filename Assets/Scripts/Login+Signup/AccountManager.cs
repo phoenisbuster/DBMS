@@ -15,11 +15,14 @@ public class AccountManager : MonoBehaviour
 
     public static string AdminLogSuccess = "Admin log-in succesfully";
     public static string UserLogSuccess = "Log-in succesfully";
+
+    public static string KEY_USER_ID = "UserId";
     
     private void OnEnable() 
     {
         Login.announce += DisplayAnnounce;
         Login.onClickSignup += DisplaySignup;
+        Login.LoginSuccess += LoadScene;
         Signup.announce += DisplayAnnounce;
         Signup.onClickBack += DisplayLogin;
     }
@@ -28,6 +31,7 @@ public class AccountManager : MonoBehaviour
     {
         Login.announce -= DisplayAnnounce;
         Login.onClickSignup -= DisplaySignup;
+        Login.LoginSuccess -= LoadScene;
         Signup.announce -= DisplayAnnounce;
         Signup.onClickBack -= DisplayLogin;
     }
@@ -35,14 +39,13 @@ public class AccountManager : MonoBehaviour
     public void DisplayAnnounce(string text)
     {
         Announce.text = text;
-        LoadScene(text);
         StartCoroutine(Display());
     }
 
     IEnumerator Display()
     {
         yield return new WaitForSeconds(TimeDisplay);
-        Announce.text = "";
+        Announce.text = "Announce display here";
     }
 
     public void DisplaySignup()
@@ -57,13 +60,22 @@ public class AccountManager : MonoBehaviour
         SignupPanel.SetActive(false);
     }
 
-    private void LoadScene(string announce)
+    private void LoadScene(bool isUser = true, int idUser = -1)
     {
-        if(announce == UserLogSuccess)
+        if(isUser)
         {
-            SceneManager.LoadScene(0);
+            if(idUser >= 0)
+            {
+                PlayerPrefs.SetInt(KEY_USER_ID, idUser);
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                Debug.LogError("User Not found");
+                DisplayAnnounce("User Not found");
+            }
         }
-        if(announce == AdminLogSuccess)
+        else
         {
             SceneManager.LoadScene(2);
         }

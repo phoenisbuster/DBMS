@@ -160,7 +160,7 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
+                        Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
                     }
                 }
             }
@@ -184,6 +184,12 @@ public class Database : MonoBehaviour
                         break;
                     case TableName.Customers:
                         command.CommandText = "DELETE FROM Customers WHERE ID = " + id + ";";
+                        break;
+                    case TableName.Books:
+                        command.CommandText = "DELETE FROM Books WHERE ISBN = " + id + ";";
+                        break;
+                    case TableName.Transactions:
+                        command.CommandText = "DELETE FROM Authors WHERE ID = " + id + ";";
                         break;
                 }
                 command.ExecuteNonQuery();

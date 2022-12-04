@@ -18,6 +18,7 @@ public class Login : MonoBehaviour
     
     public static Action onClickSignup;
     public static Action<string> announce;
+    public static Action<bool, int> LoginSuccess;
 
     public void OnClickLogin()
     {
@@ -37,13 +38,22 @@ public class Login : MonoBehaviour
                 using (IDataReader reader = command.ExecuteReader())
                 {
                     var isLogin = false;
+                    var id = -1;
                     while(reader.Read())
                     {
                         try
                         {
                             if(usernameField.text == reader["username"].ToString() && passwordField.text == reader["password"].ToString())
                             {    
-                                isLogin = true;    
+                                isLogin = true;
+                                try
+                                {
+                                    id = Int32.Parse(reader["ID"].ToString());
+                                }   
+                                catch(FormatException)
+                                {
+                                    Debug.LogError($"Unable to parse '{reader["ID"].ToString()}'");
+                                }
                                 break;
                             }
                         }
@@ -57,6 +67,7 @@ public class Login : MonoBehaviour
                     {
                         Debug.Log("Log-in succesfully");
                         announce?.Invoke(AccountManager.UserLogSuccess);
+                        LoginSuccess?.Invoke(true, id);
                     }
                     else
                     {
@@ -83,6 +94,7 @@ public class Login : MonoBehaviour
         {
             Debug.Log("Admin log-in succesfully");
             announce?.Invoke(AccountManager.AdminLogSuccess);
+            LoginSuccess?.Invoke(false, -1);
         }
         else
         {
