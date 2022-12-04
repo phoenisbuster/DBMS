@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class PopulateGrid : MonoBehaviour
 {
-
     public GameObject prefab;
     // Start is called before the first frame update
     void Start()
@@ -24,10 +23,13 @@ public class PopulateGrid : MonoBehaviour
     {
         GameObject newObj;
 
-        for(int i = 0; i < 10; i++)
+        List<string> lstDb = Database.ReturnDB();
+
+
+        foreach (var record in lstDb)
         {
             newObj = (GameObject)Instantiate(prefab, transform);
-            newObj.GetComponent<TextMeshProUGUI>().text = "sample text";
+            newObj.GetComponent<TextMeshProUGUI>().text = record;
         }
     }
 }

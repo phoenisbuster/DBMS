@@ -168,6 +168,66 @@ public class Database : MonoBehaviour
         }
     }
 
+    public static List<string> ReturnDB()
+    {
+        List<string> lst = new List<string>();
+
+        using (var connection = new SqliteConnection("URI=file:Database.db"))
+        {
+            connection.OpenAsync(CancellationToken.None);
+
+            using (var command = connection.CreateCommand())
+            {
+                lst.Add("AUTHORS:");
+                command.CommandText = "SELECT * FROM Authors";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log(" ID: " + reader["ID"] + " Name " + reader["Name"]);
+                        lst.Add(" ID: " + reader["ID"] + " Name " + reader["Name"]);
+                    }
+                }
+
+                lst.Add("CUSTOMERS:");
+                command.CommandText = "SELECT * FROM Customers";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
+                        lst.Add("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
+                    }
+                }
+
+                lst.Add("BOOKS:");
+                command.CommandText = "SELECT * FROM Books";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
+                        lst.Add(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
+                    }
+                }
+
+                lst.Add("TRANSACTIONS:");
+                command.CommandText = "SELECT * FROM Transactions";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Debug.Log(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
+                        lst.Add(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
+                    }
+                }
+            }
+            connection.CloseAsync();
+        }
+
+        return lst;
+    }
+
     public void DeleteRow(TableName table, int id)
     {
         using (var connection = new SqliteConnection(dbName))
