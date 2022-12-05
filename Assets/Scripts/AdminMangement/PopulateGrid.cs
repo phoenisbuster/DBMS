@@ -19,7 +19,7 @@ public class PopulateGrid : MonoBehaviour
         
     }
 
-    void Populate()
+    public void Populate()
     {
         GameObject newObj;
 
@@ -31,5 +31,15 @@ public class PopulateGrid : MonoBehaviour
             newObj = (GameObject)Instantiate(prefab, transform);
             newObj.GetComponent<TextMeshProUGUI>().text = record;
         }
+    }
+
+    public void Refresh()
+    {
+        foreach (Transform child in this.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        Populate();
     }
 }

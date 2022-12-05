@@ -77,7 +77,7 @@ public class Database : MonoBehaviour
         }
     }
 
-    public void InsertDB()
+    public void InsertDB(TableName table)
     {
         using (var connection = new SqliteConnection(dbName))
         {
@@ -86,7 +86,7 @@ public class Database : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
                 Debug.Log("Check table type " + tableName);
-                switch (tableName)
+                switch (table)
                 {
                     case TableName.Authors:
                         command.CommandText = "INSERT INTO Authors VALUES('"+ authorID + "','" +  authorName + "');";
@@ -114,8 +114,6 @@ public class Database : MonoBehaviour
 
             connection.CloseAsync();
         }
-
-        Display();
     }
 
     public static void Display()
@@ -185,7 +183,7 @@ public class Database : MonoBehaviour
                     while (reader.Read())
                     {
                         Debug.Log(" ID: " + reader["ID"] + " Name " + reader["Name"]);
-                        lst.Add(" ID: " + reader["ID"] + " Name " + reader["Name"]);
+                        lst.Add(" ID: " + reader["ID"] + ", Name: " + reader["Name"]);
                     }
                 }
 
@@ -196,7 +194,7 @@ public class Database : MonoBehaviour
                     while (reader.Read())
                     {
                         Debug.Log("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
-                        lst.Add("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
+                        lst.Add("ID: " + reader["ID"] + ", Name: " + reader["Name"] + ", username: " + reader["username"] + ", password: " + reader["password"]);
                     }
                 }
 
@@ -207,7 +205,7 @@ public class Database : MonoBehaviour
                     while (reader.Read())
                     {
                         Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
-                        lst.Add(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
+                        lst.Add(" ISBN: " + reader["ISBN"] + ", Title: " + reader["Title"] + ", Genre: " + reader["Genre"] + ", Publisher: " + reader["Publisher"] + ", Prices: " + reader["Prices"] + ", Year: " + reader["Year"] + ", Author ID: " + reader["AuthorID"]);
                     }
                 }
 
@@ -218,7 +216,7 @@ public class Database : MonoBehaviour
                     while (reader.Read())
                     {
                         Debug.Log(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
-                        lst.Add(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
+                        lst.Add(" customerID: " + reader["Customer_ID"] + ", BookISBN: " + reader["BookISBN"]);
                     }
                 }
             }
