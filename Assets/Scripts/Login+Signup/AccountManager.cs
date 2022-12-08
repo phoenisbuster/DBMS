@@ -17,6 +17,7 @@ public class AccountManager : MonoBehaviour
     public static string UserLogSuccess = "Log-in succesfully";
 
     public static string KEY_USER_ID = "UserId";
+    public static int noOfID = -1;
     
     private void OnEnable() 
     {
@@ -66,8 +67,9 @@ public class AccountManager : MonoBehaviour
         {
             if(idUser >= 0)
             {
-                PlayerPrefs.SetInt(KEY_USER_ID, idUser);
-                SceneManager.LoadScene(0);
+                noOfID++;
+                PlayerPrefs.SetInt(KEY_USER_ID + noOfID, idUser);
+                SceneManager.LoadScene(1);
             }
             else
             {
@@ -79,5 +81,10 @@ public class AccountManager : MonoBehaviour
         {
             SceneManager.LoadScene(2);
         }
+    }
+
+    private void Awake() 
+    {
+        noOfID = -1;
     }
 }

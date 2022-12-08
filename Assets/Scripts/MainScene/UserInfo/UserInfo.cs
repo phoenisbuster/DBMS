@@ -44,15 +44,15 @@ public class UserInfo : MonoBehaviour
 
     private void Awake() 
     {
-        userID = PlayerPrefs.GetInt(AccountManager.KEY_USER_ID, -1);
+        userID = PlayerPrefs.GetInt(AccountManager.KEY_USER_ID + AccountManager.noOfID, -1);
         if(userID >= 0)
         {
-            Debug.Log("Fetch user data success");
+            Debug.Log("Fetch user data success: " + AccountManager.KEY_USER_ID + AccountManager.noOfID);
             FetchUserData();
         }
         else
         {
-            Debug.LogError("Fetch user data fail");
+            Debug.LogError("Fetch user data fail " + AccountManager.KEY_USER_ID + AccountManager.noOfID);
         }
     }
 
@@ -214,6 +214,11 @@ public class UserInfo : MonoBehaviour
             NewPasswordInput.gameObject.SetActive(false);
         }
     }
+    
+    public int GetUserID()
+    {
+        return userID;
+    }
 
     public void OnToogleHidePassword()
     {
@@ -230,7 +235,8 @@ public class UserInfo : MonoBehaviour
         PlayerPrefs.DeleteKey(KEY_NAME);
         PlayerPrefs.DeleteKey(KEY_USERNAME);
         PlayerPrefs.DeleteKey(KEY_PASSWORD);
-        PlayerPrefs.SetInt(AccountManager.KEY_USER_ID, -1);
+        PlayerPrefs.SetInt(AccountManager.KEY_USER_ID + AccountManager.noOfID, -1);
+        AccountManager.noOfID--;
         OnClickLogout?.Invoke();
     }
 

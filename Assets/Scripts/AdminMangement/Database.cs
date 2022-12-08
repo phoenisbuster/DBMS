@@ -52,6 +52,7 @@ public class Database : MonoBehaviour
     void Start()
     {
         CreateDB();
+        //DeleteRow(TableName.Transactions, 2);
     }
 
     public void CreateDB()
@@ -98,13 +99,13 @@ public class Database : MonoBehaviour
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "','" + username + "','" + password + "');";
                         break;
                     case TableName.Transactions:
-                        command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customer_ID + "','" + book_ISBN + "');";
+                        command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now + "');";
                         break;
                     case TableName.All:
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "');" +
                             "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "','" + author_ID + "'); " +
                             "INSERT INTO Authors VALUES('" + authorID + "','" + authorName + "');" +
-                            "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + customerName + "');";
+                            "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now + "');";
                         break;
                 }
                 command.ExecuteNonQuery();
@@ -158,7 +159,7 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
+                        Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["CustomerID"] + " BookISBN " + reader["BookISBN"]);
                     }
                 }
             }
@@ -215,8 +216,8 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log(" customerID: " + reader["Customer_ID"] + " BookISBN " + reader["BookISBN"]);
-                        lst.Add(" customerID: " + reader["Customer_ID"] + ", BookISBN: " + reader["BookISBN"]);
+                        Debug.Log(" customerID: " + reader["CustomerID"] + " BookISBN " + reader["BookISBN"]);
+                        lst.Add(" customerID: " + reader["CustomerID"] + ", BookISBN: " + reader["BookISBN"]);
                     }
                 }
             }
@@ -247,7 +248,7 @@ public class Database : MonoBehaviour
                         command.CommandText = "DELETE FROM Books WHERE ISBN = " + id + ";";
                         break;
                     case TableName.Transactions:
-                        command.CommandText = "DELETE FROM Authors WHERE ID = " + id + ";";
+                        command.CommandText = "DELETE FROM Transactions WHERE ID = " + id + ";";
                         break;
                 }
                 command.ExecuteNonQuery();
