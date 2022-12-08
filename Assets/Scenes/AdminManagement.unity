@@ -2427,7 +2427,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1606894381}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Database, Assembly-CSharp
         m_MethodName: Display
         m_Mode: 1
@@ -5336,7 +5336,7 @@ MonoBehaviour:
   DB: {fileID: 1606894381}
   dropdown: {fileID: 1106724987}
   inputDeleteID: {fileID: 1168342286}
-  populateGridScript: {fileID: 1823628823}
+  populateGridScript: {fileID: 1823628825}
   arrayObjectForm:
   - {fileID: 1175930313}
   - {fileID: 1508824589}
@@ -7965,22 +7965,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 1606894379}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77e31ff5c0fc5b146a16c4acb7f0754f, type: 3}
+  m_Script: {fileID: 11500000, guid: 1726760fef0cdb849ae39676d2fe528f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   tableName: 0
   authorID: 0
-  authorName: jk rowling
+  authorName: 
   customerID: 0
-  customerName: Phuc
-  username: phucndb
-  password: 123456
+  customerName: 
+  username: 
+  password: 
   ISBN: 0
-  title: Title 1
-  genre: Harry Potter
+  title: 
+  genre: 
   publisher: 
-  prices: 5
-  year: 2010
+  prices: 0
+  year: 0
   author_ID: 0
   ID: 0
   customer_ID: 0
@@ -8930,8 +8930,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1823628821}
   - component: {fileID: 1823628824}
-  - component: {fileID: 1823628823}
   - component: {fileID: 1823628822}
+  - component: {fileID: 1823628825}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -8973,19 +8973,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 2
---- !u!114 &1823628823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1823628820}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aac3afd0404825a48831a72cd09c873d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prefab: {fileID: 744642032778812492, guid: af95ef4286134e24e9fc3ae0bc38d0f7, type: 3}
 --- !u!114 &1823628824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9010,6 +8997,19 @@ MonoBehaviour:
   m_Spacing: {x: 2, y: 2}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &1823628825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823628820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 393603d49ba9efa4f962036c752e4b7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 744642032778812492, guid: af95ef4286134e24e9fc3ae0bc38d0f7, type: 3}
 --- !u!1 &1857670850
 GameObject:
   m_ObjectHideFlags: 0
