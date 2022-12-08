@@ -10,10 +10,12 @@ public class BookComponent : MonoBehaviour
     public TextMeshProUGUI authorName;
     public TextMeshProUGUI bookPrice;
     public TextMeshProUGUI numOfUser;
+
+    public int bookID = -1;
     // Start is called before the first frame update
     void Start()
     {
-        ChangeText();
+        //ChangeText();
     }
 
     // Update is called once per frame

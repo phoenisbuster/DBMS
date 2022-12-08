@@ -5,6 +5,7 @@ using System.Data;
 using Mono.Data.Sqlite;
 using UnityEngine;
 using System.Threading;
+using TMPro;
 
 public class BookInfo : MonoBehaviour
 {
