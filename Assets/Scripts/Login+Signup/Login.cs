@@ -9,7 +9,7 @@ using System.Threading;
 
 public class Login : MonoBehaviour
 {
-    private string dbName = "URI=file:Database.db";
+    private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
 
     public TMP_InputField usernameField;
     public TMP_InputField passwordField;
@@ -20,6 +20,11 @@ public class Login : MonoBehaviour
     public static Action<string> announce;
     public static Action<bool, int> LoginSuccess;
 
+    private void Awake() 
+    {
+        dbName = Database.dbName;
+    }
+    
     public void OnClickLogin()
     {
         if(usernameField.text == "admin")

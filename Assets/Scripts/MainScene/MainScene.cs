@@ -16,8 +16,15 @@ public class MainScene : MonoBehaviour
     public GameObject BooksDetailObj;
     public GameObject UserInfoBtn;
     public TMP_Text Announce;
-    private string dbName = "URI=file:Database.db";
+    public GameObject LoginScene;
+    public bool multipleUser = false;
+    private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
     
+    private void Awake() 
+    {
+        dbName = Database.dbName;
+    }
+
     private void OnEnable() 
     {
         UserInfo.OnClickCancel += userHideClick;
@@ -68,7 +75,7 @@ public class MainScene : MonoBehaviour
         UserInfoObj.SetActive(true);
         UserInfoObj.transform.DOScale(new Vector3(1, 1, 1), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
         {
-            
+            UserInfoObj.GetComponent<UserInfo>().SetBooksHistory();
         }).SetLink(UserInfoObj);   
     }
 
@@ -93,7 +100,15 @@ public class MainScene : MonoBehaviour
 
     private void LoadLogInSignUpScene()
     {
-        SceneManager.LoadScene(0);
+        if(!multipleUser)
+        {
+            SceneManager.LoadScene(0);
+        }
+        else
+        {
+            LoginScene.SetActive(true);
+            gameObject.SetActive(false);
+        }
     }
 
     private void CreateTransaction(int bookID)
@@ -104,10 +119,10 @@ public class MainScene : MonoBehaviour
         if(userID < 0)
         {
             DisplayAnnounce("User not found, please log-out and re log-in");
-            return;
+            allowBuy = false;
         }
 
-        Debug.Log("Ready to buy " + bookID + " For User: " + userID);
+        Debug.Log("Performming to buy " + bookID + " For User: " + userID);
 
         using (var connection = new SqliteConnection(dbName))
         {
@@ -120,39 +135,45 @@ public class MainScene : MonoBehaviour
                 {
                     while(reader.Read())
                     {
-                        curIDTras++;
                         if(userID.ToString() == reader["CustomerID"].ToString())
                         {
                             if(bookID.ToString() == reader["BookISBN"].ToString())
                             {
                                 Debug.LogWarning("You already bought this book");
                                 DisplayAnnounce("You already bought this book");
-                                curIDTras--;
                                 allowBuy = false;
                             }
                         }
+                        curIDTras++;
                     }
                 }
             }
             connection.CloseAsync();
         }
 
-        if(!allowBuy)
-        {
-            return;
-        }
-
         using (var connection = new SqliteConnection(dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
+            Database.PerformTransaction(Transaction.TransactionTypes.BEGIN, connection);
+
             using (var command = connection.CreateCommand())
             {
-                Debug.Log("Success: INSERT INTO Transactions VALUES('" + curIDTras + "','" + userID + "','" + bookID + "','" + DateTime.Now + "');");
-                command.CommandText = "INSERT INTO Transactions VALUES('" + curIDTras + "','" + userID + "','" + bookID + "','" + DateTime.Now + "');";         
+                Debug.Log("INSERT INTO Transactions VALUES('" + curIDTras + "','" + userID + "','" + bookID + "','" + DateTime.Now.ToString(Database.DateFormat) + "');");
+                command.CommandText = "INSERT INTO Transactions VALUES('" + curIDTras + "','" + userID + "','" + bookID + "','" + DateTime.Now.ToString(Database.DateFormat) + "');";         
                 command.ExecuteNonQuery();
-                DisplayAnnounce("Transaction success");
+                Database.DisplayWithConnection(connection, Database.TableName.Transactions);
             }
+
+            if(allowBuy)
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.COMMIT, connection);
+            }
+            else
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.ROLLBACK, connection);
+            }
+            Database.DisplayWithConnection(connection, Database.TableName.Transactions);
             connection.CloseAsync();
         }
     }

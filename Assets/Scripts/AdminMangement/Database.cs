@@ -8,7 +8,8 @@ using System.Threading;
 
 public class Database : MonoBehaviour
 {
-    private string dbName = "URI=file:Database.db";
+    public static string dbName = "URI=file:Assets/SQLDatabase/Database.db";
+    public static string DateFormat = "yyyy-MM-dd HH:mm:ss";
 
     public enum TableName
     {
@@ -99,13 +100,13 @@ public class Database : MonoBehaviour
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "','" + username + "','" + password + "');";
                         break;
                     case TableName.Transactions:
-                        command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now + "');";
+                        command.CommandText = "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now.ToString(DateFormat) + "');";
                         break;
                     case TableName.All:
                         command.CommandText = "INSERT INTO Customers VALUES('" + customerID + "','" + customerName + "');" +
                             "INSERT INTO Books VALUES('" + ISBN + "','" + title + "','" + genre + "','" + publisher + "','" + prices + "','" + year + "','" + author_ID + "'); " +
                             "INSERT INTO Authors VALUES('" + authorID + "','" + authorName + "');" +
-                            "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now + "');";
+                            "INSERT INTO Transactions VALUES('" + ID + "','" + customerID + "','" + book_ISBN + "','" + DateTime.Now.ToString(DateFormat) + "');";
                         break;
                 }
                 command.ExecuteNonQuery();
@@ -119,9 +120,9 @@ public class Database : MonoBehaviour
 
     public static void Display()
     {
-        Debug.Log("Print");
+        Debug.Log("Print With NEW CONNECTION");
 
-        using (var connection = new SqliteConnection("URI=file:Database.db"))
+        using (var connection = new SqliteConnection(dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
@@ -159,7 +160,7 @@ public class Database : MonoBehaviour
                 {
                     while (reader.Read())
                     {
-                        Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["CustomerID"] + " BookISBN " + reader["BookISBN"]);
+                        Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["CustomerID"] + " BookISBN " + reader["BookISBN"] + " Date: " + reader["CreatedAt"].ToString());
                     }
                 }
             }
@@ -167,11 +168,62 @@ public class Database : MonoBehaviour
         }
     }
 
+    public static void DisplayWithConnection(SqliteConnection connection, TableName table)
+    {
+        Debug.Log("Print With Connection to " + table);
+        using (var command = connection.CreateCommand())
+        {
+            switch(table)
+            {    
+                case TableName.Authors:
+                    command.CommandText = "SELECT * FROM Authors";
+                    using (IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log(" ID: " + reader["ID"] + " Name " + reader["Name"]);
+                        }
+                    }
+                    break;
+                case TableName.Customers:
+                    command.CommandText = "SELECT * FROM Customers";
+                    using (IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log("ID: " + reader["ID"] + " Name " + reader["Name"] + " username " + reader["username"] + " password " + reader["password"]);
+                        }
+                    }
+                    break;
+                case TableName.Books:
+                    command.CommandText = "SELECT * FROM Books";
+                    using (IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log(" ISBN: " + reader["ISBN"] + " Title " + reader["Title"] + " Genre: " + reader["Genre"] + " Publisher " + reader["Publisher"] + " Prices: " + reader["Prices"] + " Year: " + reader["Year"] + "Author ID: " + reader["AuthorID"]);
+                        }
+                    }
+                    break;
+                case TableName.Transactions:
+                    command.CommandText = "SELECT * FROM Transactions";
+                    using (IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log("Transaction number: " + reader["ID"] + " customerID: " + reader["CustomerID"] + " BookISBN " + reader["BookISBN"] + " Date: " + reader["CreatedAt"].ToString());
+                        }
+                    }
+                    break;    
+            }
+        }
+    }
+
     public static List<string> ReturnDB()
     {
         List<string> lst = new List<string>();
 
-        using (var connection = new SqliteConnection("URI=file:Database.db"))
+        using (var connection = new SqliteConnection(dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
@@ -227,7 +279,7 @@ public class Database : MonoBehaviour
         return lst;
     }
 
-    public void DeleteRow(TableName table, int id)
+    public static void DeleteRow(TableName table, int id)
     {
         using (var connection = new SqliteConnection(dbName))
         {
@@ -256,5 +308,48 @@ public class Database : MonoBehaviour
             connection.CloseAsync();
         }
         Display();
+    }
+
+    public static void PerformTransaction(Transaction.TransactionTypes TranType, SqliteConnection SQLconnection = null)
+    {
+        string CommandText = "BEGIN;";
+        switch(TranType)
+        {
+            case Transaction.TransactionTypes.BEGIN:
+                CommandText = "BEGIN;";
+                break;
+            case Transaction.TransactionTypes.COMMIT:
+                CommandText = "COMMIT;";
+                break;
+            case Transaction.TransactionTypes.ROLLBACK:
+                CommandText = "ROLLBACK;";
+                break;
+            default:
+                CommandText = "ROLLBACK;";
+                break;
+        }
+
+        if(SQLconnection == null)
+        {
+            using (var connection = new SqliteConnection(dbName))
+            {
+                connection.OpenAsync(CancellationToken.None);
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = CommandText;
+                    command.ExecuteNonQuery();
+                }
+                connection.CloseAsync();
+            }
+        }
+        else
+        {
+            using (var command = SQLconnection.CreateCommand())
+            {
+                command.CommandText = CommandText;
+                command.ExecuteNonQuery();
+            }
+        }
     }
 }

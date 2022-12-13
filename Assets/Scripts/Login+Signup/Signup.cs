@@ -9,7 +9,7 @@ using System.Threading;
 
 public class Signup : MonoBehaviour
 {
-    private string dbName = "URI=file:Database.db";
+    private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
 
     public TMP_InputField nameField;
     public TMP_InputField usernameField;
@@ -20,33 +20,42 @@ public class Signup : MonoBehaviour
     public static Action onClickBack;
     public static Action<string> announce;
 
+    private void Awake() 
+    {
+        dbName = Database.dbName;
+        // Database.DeleteRow(Database.TableName.Customers, 8);
+    }
+
     public void OnClickSignUp()
     {
+        var isSignUp = true;
+        var lastId = 0;
+
         if(passwordField.text == "")
         {
             announce?.Invoke("Please enter password");
-            return;
+            isSignUp = false;
         }
-        
+
         using (var connection = new SqliteConnection(dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
             using (var command = connection.CreateCommand())
             {
+                command.CommandText = "BEGIN;";
+                command.ExecuteNonQuery();
+                
                 command.CommandText = "SELECT * FROM Customers";
                 using (IDataReader reader = command.ExecuteReader())
                 {
-                    var isSignUp = true;
-                    var lastId = 0;
                     while(reader.Read())
                     {
                         try
                         {
                             if(usernameField.text == reader["username"].ToString() || usernameField.text == "admin")
                             {    
-                                isSignUp = false;    
-                                break;
+                                isSignUp = false;
                             }
                         }
                         catch(Exception e)
@@ -55,48 +64,61 @@ public class Signup : MonoBehaviour
                         }
                         lastId++;
                     }
-
-                    if(isSignUp)
-                    {
-                        Debug.Log("Sign-up succesfully");
-                        announce?.Invoke("Sign-up succesfully");
-                        SignUp(lastId, nameField.text, usernameField.text, passwordField.text);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Username is already taken");
-                        announce?.Invoke("Username is already taken");
-                    }
                 }
-
+                SignUp(connection , lastId, nameField.text, usernameField.text, passwordField.text);
             }
+            if(isSignUp)
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.COMMIT, connection);
+                Debug.Log("Sign-up succesfully");
+                announce?.Invoke("Sign-up succesfully");
+            }
+            else
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.ROLLBACK, connection);
+                Debug.LogWarning("Username is already taken");
+                announce?.Invoke("Username is already taken");
+            }  
+            Database.DisplayWithConnection(connection, Database.TableName.Customers);
             connection.CloseAsync();
         }
+        Database.Display();
     }
 
-    public void OnClickCancle()
+    public void OnClickCancle(bool isRollBack = true)
     {
+        if(isRollBack)
+        {
+            Database.PerformTransaction(Transaction.TransactionTypes.ROLLBACK);
+        }
+        
         onClickBack?.Invoke();
         nameField.text = "";
         usernameField.text = "";
         passwordField.text = "";
     }
 
-    private void SignUp(int id, string name, string username, string password)
+    private void SignUp(SqliteConnection connection, int id, string name, string username, string password)
     {
-        using (var connection = new SqliteConnection(dbName))
-        {
-            connection.OpenAsync(CancellationToken.None);
+        // using (var connection = new SqliteConnection(dbName))
+        // {
+        //     connection.OpenAsync(CancellationToken.None);
 
-            using (var command = connection.CreateCommand())
-            {
-                command.CommandText = "INSERT INTO Customers VALUES('" + id + "','" + name + "','" + username + "','" + password + "');";
-                command.ExecuteNonQuery();
-                Debug.Log("Add new user success");
-            }
-            connection.CloseAsync();
+        //     using (var command = connection.CreateCommand())
+        //     {
+        //         command.CommandText = "INSERT INTO Customers VALUES('" + id + "','" + name + "','" + username + "','" + password + "');";
+        //         command.ExecuteNonQuery();
+        //         Debug.Log("Add new user success");
+        //     }
+        //     connection.CloseAsync();
+        // }
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "INSERT INTO Customers VALUES('" + id + "','" + name + "','" + username + "','" + password + "');";
+            command.ExecuteNonQuery();
         }
-        OnClickCancle();
-        Database.Display();
+        Database.DisplayWithConnection(connection, Database.TableName.Customers);
+        OnClickCancle(false);
     }
 }

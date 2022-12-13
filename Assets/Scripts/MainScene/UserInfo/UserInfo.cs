@@ -11,7 +11,7 @@ using Mono.Data.Sqlite;
 
 public class UserInfo : MonoBehaviour
 {
-    private string dbName = "URI=file:Database.db";
+    private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
     public Image Avartar;
     public Button CancelBtn;
     public Button LogoutBtn;
@@ -26,6 +26,7 @@ public class UserInfo : MonoBehaviour
     public TMP_InputField NewNameInput;
     public TMP_InputField NewPasswordInput;
     public TMP_Text Announce;
+    public TMP_Text BookIdsDisplay;
 
     public static Action OnClickCancel;
     public static Action OnClickLogout;
@@ -44,6 +45,7 @@ public class UserInfo : MonoBehaviour
 
     private void Awake() 
     {
+        dbName = Database.dbName;
         userID = PlayerPrefs.GetInt(AccountManager.KEY_USER_ID + AccountManager.noOfID, -1);
         if(userID >= 0)
         {
@@ -77,14 +79,16 @@ public class UserInfo : MonoBehaviour
             }
             connection.CloseAsync();
         }
+        SetBooksHistory();
     }
 
     private void ChangUserData(int target, string value) 
     {
+        var allowChanged = true;
         if(value == "")
         {
             DisplayAnnounce("Incorrect input format");
-            return;
+            allowChanged = false;
         }        
         var fieldName = target == ((int)TargetChange.Name)? "Name" : "password";
         var NewName = target == ((int)TargetChange.Name)? value : "";
@@ -92,12 +96,26 @@ public class UserInfo : MonoBehaviour
         using (var connection = new SqliteConnection(dbName))
         {
             connection.OpenAsync(CancellationToken.None);
+            
+            Database.PerformTransaction(Transaction.TransactionTypes.BEGIN, connection);
+
             using (var command = connection.CreateCommand())
             {
                 command.CommandText = "UPDATE Customers SET " + fieldName + " = '" + value + "' WHERE ID = " + userID + ";";
                 command.ExecuteNonQuery();
-                DisplayAnnounce("Update " + fieldName + " success");
+                Database.DisplayWithConnection(connection, Database.TableName.Customers);
             }
+
+            if(allowChanged)
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.COMMIT, connection);
+                DisplayAnnounce("Change " + fieldName + " success");
+            }
+            else
+            {
+                Database.PerformTransaction(Transaction.TransactionTypes.ROLLBACK, connection);
+            }
+            Database.DisplayWithConnection(connection, Database.TableName.Customers);
             connection.CloseAsync();
         }
         SaveToLocalData(NewName, "", NewPass, false);
@@ -108,19 +126,19 @@ public class UserInfo : MonoBehaviour
     {
         if(name != "")
         {
-            PlayerPrefs.SetString(KEY_NAME, name);
+            PlayerPrefs.SetString(KEY_NAME+userID, name);
             SetNameDisplay();
         }           
 
         if(username != "")
         {
-            PlayerPrefs.SetString(KEY_USERNAME, username);
+            PlayerPrefs.SetString(KEY_USERNAME+userID, username);
             SetUserNameDisplay();
         }
             
         if(passowrd != "")
         {
-            PlayerPrefs.SetString(KEY_PASSWORD, passowrd);
+            PlayerPrefs.SetString(KEY_PASSWORD+userID, passowrd);
             SetPasswordDisplay();
         }   
         Debug.Log("Fetch data " + "ID: " + userID + " name: " + name + " username: " + username + " password " + passowrd);
@@ -130,12 +148,12 @@ public class UserInfo : MonoBehaviour
 
     private void SetNameDisplay()
     {
-        NameDisplay.text = "Your Name: " + PlayerPrefs.GetString(KEY_NAME, "You have't set a name yet");
+        NameDisplay.text = "Your Name: " + PlayerPrefs.GetString(KEY_NAME+userID, "You have't set a name yet");
     }
 
     private void SetUserNameDisplay()
     {
-        UsernameDisplay.text = "User Name: " + PlayerPrefs.GetString(KEY_USERNAME, "");
+        UsernameDisplay.text = "User Name: " + PlayerPrefs.GetString(KEY_USERNAME+userID, "");
     }
 
     private void SetPasswordDisplay()
@@ -146,9 +164,33 @@ public class UserInfo : MonoBehaviour
         }
         else
         {
-            PasswordDisplay.text = "Your Password: " + PlayerPrefs.GetString(KEY_PASSWORD, "000000");
+            PasswordDisplay.text = "Your Password: " + PlayerPrefs.GetString(KEY_PASSWORD+userID, "000000");
         }
     }
+
+    public void SetBooksHistory()
+    {
+        string bookids = "All bookIds you bought: ";
+        using (var connection = new SqliteConnection(dbName))
+        {
+            connection.OpenAsync(CancellationToken.None);
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "SELECT bookisbn FROM Transactions WHERE customerid = " + userID + ";";
+                using (IDataReader reader = command.ExecuteReader())
+                {
+                    while(reader.Read())
+                    {
+                        bookids += reader["BookISBN"].ToString() + " ";
+                    }
+                }
+            }
+            connection.CloseAsync();
+        }
+        Debug.Log("Fetch Transaction for user data complete");
+        BookIdsDisplay.text = bookids;
+    }
+
     public void DisplayAnnounce(string text)
     {
         Announce.text = text;
@@ -232,10 +274,10 @@ public class UserInfo : MonoBehaviour
 
     public void OnClickLogoutBtn()
     {
-        PlayerPrefs.DeleteKey(KEY_NAME);
-        PlayerPrefs.DeleteKey(KEY_USERNAME);
-        PlayerPrefs.DeleteKey(KEY_PASSWORD);
-        PlayerPrefs.SetInt(AccountManager.KEY_USER_ID + AccountManager.noOfID, -1);
+        PlayerPrefs.DeleteKey(KEY_NAME + userID);
+        PlayerPrefs.DeleteKey(KEY_USERNAME + userID);
+        PlayerPrefs.DeleteKey(KEY_PASSWORD + userID);
+        PlayerPrefs.DeleteKey(AccountManager.KEY_USER_ID + AccountManager.noOfID);
         AccountManager.noOfID--;
         OnClickLogout?.Invoke();
     }

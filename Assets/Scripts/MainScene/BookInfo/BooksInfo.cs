@@ -15,12 +15,13 @@ public class BooksInfo : MonoBehaviour
     public ScrollRect ScrollObj;
     public GameObject ContentView;
     public GameObject DetailedView;
-    private string dbName = "URI=file:Database.db";
+    private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
     private bool onRefresh = false;
     Dictionary<string, GameObject> books = new Dictionary<string, GameObject>(); 
     
     void Awake()
     {
+        dbName = Database.dbName;
         FetchBooksData();    
     }
 
@@ -61,7 +62,7 @@ public class BooksInfo : MonoBehaviour
             }
             connection.CloseAsync();
         }
-
+        Debug.Log("Fetch book data complete");
         FetchTransaction();
     }
 
@@ -90,11 +91,17 @@ public class BooksInfo : MonoBehaviour
             }
         }
         onRefresh = false;
+        Debug.Log("Fetch transaction for book data complete");
+    }
+
+    public void OnCLickRefreshBookData()
+    {
+        FetchBooksData();
     }
 
     void Update()
     {
-        if (ScrollObj.verticalNormalizedPosition >= 1.1f && !onRefresh)
+        if(ScrollObj.verticalNormalizedPosition >= 1.1f && !onRefresh)
         {
             Debug.Log("Reload");
             onRefresh = true;

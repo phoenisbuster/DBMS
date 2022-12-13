@@ -18,6 +18,8 @@ public class AccountManager : MonoBehaviour
 
     public static string KEY_USER_ID = "UserId";
     public static int noOfID = -1;
+    public GameObject newScene;
+    public bool multipleUser = false;
     
     private void OnEnable() 
     {
@@ -63,23 +65,31 @@ public class AccountManager : MonoBehaviour
 
     private void LoadScene(bool isUser = true, int idUser = -1)
     {
-        if(isUser)
-        {
-            if(idUser >= 0)
+        if(!multipleUser)
+        {    
+            if(isUser)
             {
-                noOfID++;
-                PlayerPrefs.SetInt(KEY_USER_ID + noOfID, idUser);
-                SceneManager.LoadScene(1);
+                if(idUser >= 0)
+                {
+                    noOfID++;
+                    PlayerPrefs.SetInt(KEY_USER_ID + noOfID, idUser);
+                    SceneManager.LoadScene(1);
+                }
+                else
+                {
+                    Debug.LogError("User Not found");
+                    DisplayAnnounce("User Not found");
+                }
             }
             else
             {
-                Debug.LogError("User Not found");
-                DisplayAnnounce("User Not found");
+                SceneManager.LoadScene(2);
             }
         }
         else
         {
-            SceneManager.LoadScene(2);
+            newScene.SetActive(true);
+            gameObject.SetActive(false);
         }
     }
 

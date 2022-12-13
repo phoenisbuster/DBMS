@@ -150,16 +150,16 @@ public class PopupController : MonoBehaviour
         switch (dropdown.value)
         {
             case 0:
-                DB.DeleteRow(Database.TableName.Authors, Int32.Parse(inputDeleteID.text));
+                Database.DeleteRow(Database.TableName.Authors, Int32.Parse(inputDeleteID.text));
                 break;
             case 1:
-                DB.DeleteRow(Database.TableName.Customers, Int32.Parse(inputDeleteID.text));
+                Database.DeleteRow(Database.TableName.Customers, Int32.Parse(inputDeleteID.text));
                 break;
             case 2:
-                DB.DeleteRow(Database.TableName.Books, Int32.Parse(inputDeleteID.text));
+                Database.DeleteRow(Database.TableName.Books, Int32.Parse(inputDeleteID.text));
                 break;
             case 3:
-                DB.DeleteRow(Database.TableName.Transactions, Int32.Parse(inputDeleteID.text));
+                Database.DeleteRow(Database.TableName.Transactions, Int32.Parse(inputDeleteID.text));
                 break;
         }
 
