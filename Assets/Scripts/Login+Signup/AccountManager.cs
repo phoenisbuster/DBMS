@@ -19,8 +19,17 @@ public class AccountManager : MonoBehaviour
     public static string KEY_USER_ID = "UserId";
     public static int noOfID = -1;
     public GameObject newScene;
+    public GameObject AdminScene;
+    public ClientManager clientManager;
     public bool multipleUser = false;
+    public int fixID = 0;
     
+    public void SetDBName()
+    {
+        LoginPanel.GetComponent<Login>().SetDBName();
+        SignupPanel.GetComponent<Signup>().SetDBName();
+    }
+
     private void OnEnable() 
     {
         Login.announce += DisplayAnnounce;
@@ -41,8 +50,19 @@ public class AccountManager : MonoBehaviour
 
     public void DisplayAnnounce(string text)
     {
-        Announce.text = text;
-        StartCoroutine(Display());
+        if(!multipleUser)
+        {
+            Announce.text = text;
+            StartCoroutine(Display());
+        }
+        else
+        {
+            if(ClientManager.noOfID == fixID - 1)
+            {
+                Announce.text = text;
+                StartCoroutine(Display());
+            }
+        }
     }
 
     IEnumerator Display()
@@ -63,6 +83,25 @@ public class AccountManager : MonoBehaviour
         SignupPanel.SetActive(false);
     }
 
+    public bool CheckAllowAction(int userID)
+    {
+        if(!multipleUser)
+        {
+            return true;
+        }
+        else
+        {
+            if(clientManager.UserList.ContainsKey(fixID))
+            {
+                if(clientManager.UserList[fixID] == userID)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     private void LoadScene(bool isUser = true, int idUser = -1)
     {
         if(!multipleUser)
@@ -71,8 +110,8 @@ public class AccountManager : MonoBehaviour
             {
                 if(idUser >= 0)
                 {
-                    noOfID++;
-                    PlayerPrefs.SetInt(KEY_USER_ID + noOfID, idUser);
+                    ClientManager.noOfID++;
+                    PlayerPrefs.SetInt(KEY_USER_ID + ClientManager.noOfID, idUser);
                     SceneManager.LoadScene(1);
                 }
                 else
@@ -88,13 +127,32 @@ public class AccountManager : MonoBehaviour
         }
         else
         {
-            newScene.SetActive(true);
-            gameObject.SetActive(false);
+            if(isUser && (ClientManager.noOfID == fixID-1))
+            {
+                ClientManager.noOfID++;
+                PlayerPrefs.SetInt(KEY_USER_ID + ClientManager.noOfID, idUser);
+            }
+
+            Debug.LogWarning("CHECK cur user Order: " + ClientManager.noOfID + " Mathch userID: " + idUser);
+
+            if(!isUser && fixID == -1)
+            {
+                AdminScene.SetActive(true);
+                gameObject.SetActive(false);
+            }
+            else if(ClientManager.noOfID == fixID)
+            {
+                clientManager.UserList.Add(fixID, idUser);
+                
+                newScene.SetActive(true);
+                gameObject.SetActive(false);
+            }    
         }
     }
 
     private void Awake() 
     {
-        noOfID = -1;
+        //ClientManager.noOfID = -1;
+        SetDBName();
     }
 }

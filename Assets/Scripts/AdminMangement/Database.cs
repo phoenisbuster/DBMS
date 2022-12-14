@@ -8,7 +8,7 @@ using System.Threading;
 
 public class Database : MonoBehaviour
 {
-    public static string dbName = "URI=file:Assets/SQLDatabase/Database.db";
+    public static string dbName = "URI=file:Assets/Resources/SQLDatabase/Database.db";
     public static string DateFormat = "yyyy-MM-dd HH:mm:ss";
 
     public enum TableName
@@ -52,7 +52,7 @@ public class Database : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CreateDB();
+        //CreateDB();
         //DeleteRow(TableName.Transactions, 2);
     }
 

@@ -24,6 +24,11 @@ public class Login : MonoBehaviour
     {
         dbName = Database.dbName;
     }
+
+    public void SetDBName()
+    {
+        dbName = Database.dbName;
+    }
     
     public void OnClickLogin()
     {
@@ -33,56 +38,65 @@ public class Login : MonoBehaviour
             return;
         }
 
-        using (var connection = new SqliteConnection(dbName))
+        try
         {
-            connection.OpenAsync(CancellationToken.None);
-
-            using (var command = connection.CreateCommand())
+            Debug.LogWarning("Check Database path before login: " + Database.dbName);
+            using (var connection = new SqliteConnection(Database.dbName))
             {
-                command.CommandText = "SELECT * FROM Customers";
-                using (IDataReader reader = command.ExecuteReader())
+                connection.OpenAsync(CancellationToken.None);
+
+                using (var command = connection.CreateCommand())
                 {
-                    var isLogin = false;
-                    var id = -1;
-                    while(reader.Read())
+                    command.CommandText = "SELECT * FROM Customers";
+                    using (IDataReader reader = command.ExecuteReader())
                     {
-                        try
+                        var isLogin = false;
+                        var id = -1;
+                        while(reader.Read())
                         {
-                            if(usernameField.text == reader["username"].ToString() && passwordField.text == reader["password"].ToString())
-                            {    
-                                isLogin = true;
-                                try
-                                {
-                                    id = Int32.Parse(reader["ID"].ToString());
-                                }   
-                                catch(FormatException)
-                                {
-                                    Debug.LogError($"Unable to parse '{reader["ID"].ToString()}'");
+                            try
+                            {
+                                if(usernameField.text == reader["username"].ToString() && passwordField.text == reader["password"].ToString())
+                                {    
+                                    isLogin = true;
+                                    try
+                                    {
+                                        id = Int32.Parse(reader["ID"].ToString());
+                                    }   
+                                    catch(FormatException)
+                                    {
+                                        Debug.LogError($"Unable to parse '{reader["ID"].ToString()}'");
+                                    }
+                                    break;
                                 }
-                                break;
+                            }
+                            catch(Exception e)
+                            {
+                                Debug.LogWarning(e.Message);
                             }
                         }
-                        catch(Exception e)
+
+                        if(isLogin)
                         {
-                            Debug.LogWarning(e.Message);
+                            Debug.Log("Log-in succesfully");
+                            announce?.Invoke(AccountManager.UserLogSuccess);
+                            LoginSuccess?.Invoke(true, id);
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Username or Password are not correct");
+                            announce?.Invoke("Username or Password are not correct");
                         }
                     }
 
-                    if(isLogin)
-                    {
-                        Debug.Log("Log-in succesfully");
-                        announce?.Invoke(AccountManager.UserLogSuccess);
-                        LoginSuccess?.Invoke(true, id);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("Username or Password are not correct");
-                        announce?.Invoke("Username or Password are not correct");
-                    }
                 }
-
+                connection.CloseAsync();
             }
-            connection.CloseAsync();
+        }
+        catch(Exception e)
+        {
+            Debug.LogWarning("Database not found " + dbName + " With message " + e.Message);
+            announce?.Invoke("Database not found");
         }
     }
 

@@ -23,7 +23,11 @@ public class Signup : MonoBehaviour
     private void Awake() 
     {
         dbName = Database.dbName;
-        // Database.DeleteRow(Database.TableName.Customers, 8);
+    }
+
+    public void SetDBName()
+    {
+        dbName = Database.dbName;
     }
 
     public void OnClickSignUp()
@@ -37,7 +41,7 @@ public class Signup : MonoBehaviour
             isSignUp = false;
         }
 
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
@@ -85,13 +89,8 @@ public class Signup : MonoBehaviour
         Database.Display();
     }
 
-    public void OnClickCancle(bool isRollBack = true)
-    {
-        if(isRollBack)
-        {
-            Database.PerformTransaction(Transaction.TransactionTypes.ROLLBACK);
-        }
-        
+    public void OnClickCancle()
+    {        
         onClickBack?.Invoke();
         nameField.text = "";
         usernameField.text = "";
@@ -119,6 +118,6 @@ public class Signup : MonoBehaviour
             command.ExecuteNonQuery();
         }
         Database.DisplayWithConnection(connection, Database.TableName.Customers);
-        OnClickCancle(false);
+        OnClickCancle();
     }
 }

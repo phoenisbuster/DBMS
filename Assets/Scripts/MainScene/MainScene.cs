@@ -18,16 +18,25 @@ public class MainScene : MonoBehaviour
     public TMP_Text Announce;
     public GameObject LoginScene;
     public bool multipleUser = false;
+    public int fixID = -1;
+    public ClientManager clientManager;
+    public int thisID = -1;
     private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
     
     private void Awake() 
     {
-        dbName = Database.dbName;
+        dbName = Database.dbName;       
+        BooksInfoObj.GetComponent<BooksInfo>().SetMultiple(multipleUser);
+        
+    }
+
+    private void Start() {
+        thisID = UserInfoObj.GetComponent<UserInfo>().GetUserID();
     }
 
     private void OnEnable() 
     {
-        UserInfo.OnClickCancel += userHideClick;
+        UserInfo.OnClickCancel += OnClickUserInfo;
         UserInfo.OnClickLogout += LoadLogInSignUpScene;
 
         BookComponent.OnClickDetail += bookRevealClick;
@@ -39,7 +48,7 @@ public class MainScene : MonoBehaviour
 
     private void OnDisable() 
     {
-        UserInfo.OnClickCancel -= userHideClick;
+        UserInfo.OnClickCancel -= OnClickUserInfo;
         UserInfo.OnClickLogout -= LoadLogInSignUpScene;
 
         BookComponent.OnClickDetail -= bookRevealClick;
@@ -49,25 +58,46 @@ public class MainScene : MonoBehaviour
         BookDetail.OnClickBuy -= CreateTransaction;
     }
 
-    public void OnClickUserInfo()
+    public void OnClickUserInfo(int id)
+    { 
+        if(CheckAllowAction(id < 0? thisID : id))
+        {    
+            if(UserInfoObj.activeSelf)
+            {
+                userHideClick(thisID);
+            }
+            else
+            {
+                userRevealClick();
+            } 
+        }   
+    }
+
+    public bool CheckAllowAction(int userID)
     {
-        if(UserInfoObj.activeSelf)
+        if(!multipleUser)
         {
-            userHideClick();
+            return true;
         }
         else
         {
-            userRevealClick();
+            if(clientManager.UserList.ContainsKey(fixID))
+            {
+                if(clientManager.UserList[fixID] == userID)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
-    private void userHideClick()
+    private void userHideClick(int userID)
     {
         UserInfoObj.transform.DOScale(new Vector3(0, 0, 0), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
         {
             UserInfoObj.SetActive(false);
-        }).SetLink(UserInfoObj);
-       
+        }).SetLink(UserInfoObj);   
     }
 
     private void userRevealClick()
@@ -81,39 +111,53 @@ public class MainScene : MonoBehaviour
 
     private void bookHideClick()
     {
-        BooksDetailObj.transform.DOScale(new Vector3(0, 0, 0), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
-        {
-            BooksDetailObj.SetActive(false);
-        }).SetLink(UserInfoObj);
-       
+        if(CheckAllowAction(thisID))
+        {     
+            BooksDetailObj.transform.DOScale(new Vector3(0, 0, 0), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
+            {
+                BooksDetailObj.SetActive(false);
+            }).SetLink(UserInfoObj);
+        }
     }
 
     private void bookRevealClick(Book book, int count)
     {
-        BooksDetailObj.SetActive(true);
-        BooksDetailObj.GetComponent<BookDetail>().SetBookDetail(book, count);
-        BooksDetailObj.transform.DOScale(new Vector3(1, 1, 1), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
-        {
-            
-        }).SetLink(UserInfoObj);   
+        if(CheckAllowAction(thisID))
+        {    
+            BooksDetailObj.SetActive(true);
+            BooksDetailObj.GetComponent<BookDetail>().SetBookDetail(book, count);
+            BooksDetailObj.transform.DOScale(new Vector3(1, 1, 1), 0.25f).SetEase(Ease.InOutElastic).OnComplete(()=>
+            {
+                
+            }).SetLink(UserInfoObj);
+        }
     }
 
-    private void LoadLogInSignUpScene()
+    private void LoadLogInSignUpScene(int userID)
     {
-        if(!multipleUser)
+        if(CheckAllowAction(userID))
         {
-            SceneManager.LoadScene(0);
-        }
-        else
-        {
-            LoginScene.SetActive(true);
-            gameObject.SetActive(false);
+            if(!multipleUser)
+            {
+                SceneManager.LoadScene(0);
+            }
+            else
+            {
+                LoginScene.SetActive(true);
+                gameObject.SetActive(false);
+            }
         }
     }
 
     private void CreateTransaction(int bookID)
     {
-        int userID = UserInfoObj.GetComponent<UserInfo>().GetUserID();
+        if(!CheckAllowAction(thisID))
+        {
+            return;
+        }
+        
+        var userID = thisID;
+
         int curIDTras = 0;
         bool allowBuy = true;
         if(userID < 0)
@@ -124,7 +168,7 @@ public class MainScene : MonoBehaviour
 
         Debug.Log("Performming to buy " + bookID + " For User: " + userID);
 
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 
@@ -151,7 +195,7 @@ public class MainScene : MonoBehaviour
             connection.CloseAsync();
         }
 
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
 

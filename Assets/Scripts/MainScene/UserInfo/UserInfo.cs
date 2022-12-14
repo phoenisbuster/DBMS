@@ -28,13 +28,13 @@ public class UserInfo : MonoBehaviour
     public TMP_Text Announce;
     public TMP_Text BookIdsDisplay;
 
-    public static Action OnClickCancel;
-    public static Action OnClickLogout;
+    public static Action<int> OnClickCancel;
+    public static Action<int> OnClickLogout;
 
     private string KEY_NAME = "Name";
     private string KEY_USERNAME = "UserName";
     private string KEY_PASSWORD = "Password";
-    private int userID = -1;
+    public int userID = -1;
     private enum TargetChange
     {
         Name,
@@ -46,21 +46,21 @@ public class UserInfo : MonoBehaviour
     private void Awake() 
     {
         dbName = Database.dbName;
-        userID = PlayerPrefs.GetInt(AccountManager.KEY_USER_ID + AccountManager.noOfID, -1);
+        userID = PlayerPrefs.GetInt(AccountManager.KEY_USER_ID + ClientManager.noOfID, -1);
         if(userID >= 0)
         {
-            Debug.Log("Fetch user data success: " + AccountManager.KEY_USER_ID + AccountManager.noOfID);
+            Debug.Log("Fetch user data success: " + AccountManager.KEY_USER_ID + ClientManager.noOfID);
             FetchUserData();
         }
         else
         {
-            Debug.LogError("Fetch user data fail " + AccountManager.KEY_USER_ID + AccountManager.noOfID);
+            Debug.LogError("Fetch user data fail " + AccountManager.KEY_USER_ID + ClientManager.noOfID);
         }
     }
 
     private void FetchUserData() 
     {
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
             using (var command = connection.CreateCommand())
@@ -93,7 +93,7 @@ public class UserInfo : MonoBehaviour
         var fieldName = target == ((int)TargetChange.Name)? "Name" : "password";
         var NewName = target == ((int)TargetChange.Name)? value : "";
         var NewPass = target == ((int)TargetChange.Password)? value : "";
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
             
@@ -171,7 +171,7 @@ public class UserInfo : MonoBehaviour
     public void SetBooksHistory()
     {
         string bookids = "All bookIds you bought: ";
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
             using (var command = connection.CreateCommand())
@@ -269,7 +269,7 @@ public class UserInfo : MonoBehaviour
 
     public void OnClickBtnX()
     {
-        OnClickCancel?.Invoke();
+        OnClickCancel?.Invoke(userID);
     }
 
     public void OnClickLogoutBtn()
@@ -277,9 +277,9 @@ public class UserInfo : MonoBehaviour
         PlayerPrefs.DeleteKey(KEY_NAME + userID);
         PlayerPrefs.DeleteKey(KEY_USERNAME + userID);
         PlayerPrefs.DeleteKey(KEY_PASSWORD + userID);
-        PlayerPrefs.DeleteKey(AccountManager.KEY_USER_ID + AccountManager.noOfID);
-        AccountManager.noOfID--;
-        OnClickLogout?.Invoke();
+        PlayerPrefs.DeleteKey(AccountManager.KEY_USER_ID + ClientManager.noOfID);
+        ClientManager.noOfID--;
+        OnClickLogout?.Invoke(userID);
     }
 
 }

@@ -17,12 +17,17 @@ public class BooksInfo : MonoBehaviour
     public GameObject DetailedView;
     private string dbName = "URI=file:Assets/SQLDatabase/Database.db";
     private bool onRefresh = false;
-    Dictionary<string, GameObject> books = new Dictionary<string, GameObject>(); 
+    private bool isMultiple = false;
+    Dictionary<string, GameObject> books = new Dictionary<string, GameObject>();
     
     void Awake()
     {
-        dbName = Database.dbName;
-        FetchBooksData();    
+        dbName = Database.dbName;            
+    }
+
+    void Start()
+    {
+        FetchBooksData();
     }
 
     private void FetchBooksData()
@@ -34,7 +39,7 @@ public class BooksInfo : MonoBehaviour
 
         books.Clear();
         
-        using (var connection = new SqliteConnection(dbName))
+        using (var connection = new SqliteConnection(Database.dbName))
         {
             connection.OpenAsync(CancellationToken.None);
             using (var command = connection.CreateCommand())
@@ -54,6 +59,10 @@ public class BooksInfo : MonoBehaviour
                         var authorName = reader["Name"].ToString();
 
                         var bookInstance = GameObject.Instantiate(BookItemPrefab, Vector3.zero, Quaternion.identity);
+                        if(isMultiple)
+                        {
+                            bookInstance.transform.localScale = new Vector3(0.5f, 0.5f, 1);
+                        }
                         bookInstance.transform.SetParent(ContentView.transform);
                         bookInstance.GetComponent<BookComponent>().DisplayData(isbn, title, price, genre, publisher, year, authorID, authorName);
                         books.Add(isbn, bookInstance);
@@ -72,7 +81,7 @@ public class BooksInfo : MonoBehaviour
         foreach (var item in books)
         {
             count = 0;
-            using (var connection = new SqliteConnection(dbName))
+            using (var connection = new SqliteConnection(Database.dbName))
             {
                 connection.OpenAsync(CancellationToken.None);
                 using (var command = connection.CreateCommand())
@@ -97,6 +106,11 @@ public class BooksInfo : MonoBehaviour
     public void OnCLickRefreshBookData()
     {
         FetchBooksData();
+    }
+
+    public void SetMultiple(bool value)
+    {
+        isMultiple = value;
     }
 
     void Update()
