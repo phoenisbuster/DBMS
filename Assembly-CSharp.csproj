@@ -37,6 +37,7 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\AdminMangement\Transaction.cs" />
+     <Compile Include="Assets\Scripts\LoadDataOnBuild\LoadDataOnBuild.cs" />
      <Compile Include="Assets\Scripts\MainScene\MainScene.cs" />
      <Compile Include="Assets\Scripts\Login+Signup\AccountManager.cs" />
      <Compile Include="Assets\Scripts\AdminMangement\Database.cs" />
@@ -50,9 +51,8 @@
      <Compile Include="Assets\Scripts\MainScene\BookInfo\BookDetail.cs" />
      <Compile Include="Assets\Scripts\MainScene\BookInfo\Book.cs" />
      <Compile Include="Assets\Scripts\AdminMangement\PopulateGrid.cs" />
-     <Compile Include="Assets\Scripts\Login+Signup\Signup.cs" />
-     <Compile Include="Assets\Scripts\LoadDataOnBuild\LoadDataOnBuild.cs" />
      <Compile Include="Assets\Scripts\MultipleClients\ClientManager.cs" />
+     <Compile Include="Assets\Scripts\Login+Signup\Signup.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

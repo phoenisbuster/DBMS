@@ -143,6 +143,14 @@ public class MainScene : MonoBehaviour
             }
             else
             {
+                foreach (var item in clientManager.UserList)
+                {
+                    if(item.Value == userID)
+                    {
+                        clientManager.UserList.Remove(item.Key);
+                        break;
+                    }
+                }
                 LoginScene.SetActive(true);
                 gameObject.SetActive(false);
             }
